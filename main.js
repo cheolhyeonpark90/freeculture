@@ -13,6 +13,7 @@ function getTodayString() {
 document.addEventListener('DOMContentLoaded', async () => {
     // --- DOM 요소 및 상태 변수 초기화 ---
     const filterButtons = document.querySelectorAll('.filter-btn');
+    const resetFiltersBtn = document.getElementById('reset-filters-btn');
     const dropdownContainer = document.getElementById('dropdown-container');
     
     let allEvents = [];
@@ -21,12 +22,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     let isLoading = false;
     let observer;
 
-    let calendarDisplayDate = new Date(); // 캘린더 UI 표시용 날짜
+    let calendarDisplayDate = new Date();
 
-    // 페이지 로드 시 오늘 날짜를 기본 필터로 설정
-    const activeFilters = {
+    const initialFilters = {
         sido: null, sigungu: null, price: null, category: null, date: getTodayString(),
     };
+    
+    let activeFilters = { ...initialFilters };
 
     // --- 데이터 로딩 및 초기화 ---
     try {
@@ -39,9 +41,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('event-list').innerHTML = '<p style="text-align:center; padding: 40px; color: var(--text-secondary);">문화 행사 정보를 불러오지 못했습니다.<br>로컬 서버를 실행했는지 확인해주세요.</p>';
     }
 
-    // 초기화 함수
     function initialize() {
-        updateFilterButtonText(document.querySelector('[data-filter="date"]'), 'date', '오늘');
+        updateAllFilterButtons();
         applyAndRenderFilters();
     }
 
@@ -120,6 +121,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     });
+    
+    resetFiltersBtn.addEventListener('click', () => {
+        activeFilters = { ...initialFilters };
+        calendarDisplayDate = new Date();
+        updateAllFilterButtons();
+        applyAndRenderFilters();
+        closeAllDropdowns();
+    });
 
     function closeAllDropdowns() {
         filterButtons.forEach(btn => btn.classList.remove('active'));
@@ -160,9 +169,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const dateStr = target.dataset.date;
 
         if (['prev-year', 'next-year', 'prev-month', 'next-month'].includes(action)) {
-            // [수정] 이벤트 전파를 막아 document의 클릭 리스너가 동작하지 않도록 합니다.
             e.stopPropagation();
-            
             if (action === 'prev-month') calendarDisplayDate.setMonth(calendarDisplayDate.getMonth() - 1);
             if (action === 'next-month') calendarDisplayDate.setMonth(calendarDisplayDate.getMonth() + 1);
             if (action === 'prev-year') calendarDisplayDate.setFullYear(calendarDisplayDate.getFullYear() - 1);
@@ -175,78 +182,90 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (action === 'select-today') {
             activeFilters.date = getTodayString();
-            calendarDisplayDate = new Date();
-            updateFilterButtonText(filterButton, 'date', '오늘');
         } else if (action === 'deselect-date') {
             activeFilters.date = null;
-            updateFilterButtonText(filterButton, 'date', null);
         } else if (dateStr) {
             activeFilters.date = dateStr;
-            const year = dateStr.substring(0, 4);
-            const month = dateStr.substring(4, 6);
-            const day = dateStr.substring(6, 8);
-            updateFilterButtonText(filterButton, 'date', `${year}.${month}.${day}`);
         }
         
+        updateAllFilterButtons();
         applyAndRenderFilters();
         closeAllDropdowns();
     }
 
-
+    // [수정] 지역 필터 로직 개선
     function handleFilterSelection(e, type, button) {
         const target = e.target.closest('.region-item, .option-item');
         if (!target) return;
-        if (type === 'region') {
-            if (target.parentElement.classList.contains('sido-col')) {
-                const selectedSido = target.dataset.value;
-                if (selectedSido === '전체') {
-                    activeFilters.sido = null;
-                    activeFilters.sigungu = null;
-                    updateFilterButtonText(button, 'region', '전체');
-                    applyAndRenderFilters();
-                    closeAllDropdowns();
-                } else {
-                    activeFilters.sido = selectedSido;
-                    activeFilters.sigungu = null;
-                    target.parentElement.querySelectorAll('.region-item').forEach(item => item.classList.remove('selected'));
-                    target.classList.add('selected');
-                    updateSigunguList(selectedSido, target.closest('.dropdown-menu'));
-                    updateFilterButtonText(button, 'region', selectedSido);
-                }
-            } else {
-                const selectedSigungu = target.dataset.value;
-                if (selectedSigungu === '전체') {
-                    activeFilters.sigungu = null;
-                    updateFilterButtonText(button, 'region', activeFilters.sido);
-                } else {
-                    activeFilters.sigungu = selectedSigungu;
-                    updateFilterButtonText(button, 'region', `${activeFilters.sido} ${activeFilters.sigungu}`);
-                }
-                closeAllDropdowns();
+
+        // Case 1: 시/도(Sido) 선택
+        if (type === 'region' && target.parentElement.classList.contains('sido-col')) {
+            const selectedSido = target.dataset.value;
+            
+            if (selectedSido === '전체') {
+                activeFilters.sido = null;
+                activeFilters.sigungu = null;
+                updateAllFilterButtons();
                 applyAndRenderFilters();
+                closeAllDropdowns();
+            } else {
+                e.stopPropagation(); // 드롭다운이 닫히지 않도록 이벤트 전파 중단
+                activeFilters.sido = selectedSido;
+                activeFilters.sigungu = null;
+                target.parentElement.querySelectorAll('.region-item').forEach(item => item.classList.remove('selected'));
+                target.classList.add('selected');
+                updateSigunguList(selectedSido, target.closest('.dropdown-menu'));
+                updateAllFilterButtons(); // 버튼 텍스트만 업데이트
             }
-        } else {
-            const value = target.dataset.value;
-            if (type === 'price') activeFilters.price = (value === '모두' || !value) ? null : value;
-            if (type === 'category') activeFilters.category = (value === '모든 카테고리' || !value) ? null : value;
-            updateFilterButtonText(button, type, value);
-            closeAllDropdowns();
-            applyAndRenderFilters();
+            return;
         }
+
+        // Case 2: 시/군/구, 가격, 카테고리 등 최종 선택
+        if (type === 'region') { // 시/군/구 선택
+            const selectedSigungu = target.dataset.value;
+            activeFilters.sigungu = selectedSigungu === '전체' ? null : selectedSigungu;
+        } else if (type === 'price') { // 가격 선택
+            activeFilters.price = target.dataset.value === '모두' ? null : target.dataset.value;
+        } else if (type === 'category') { // 카테고리 선택
+            activeFilters.category = target.dataset.value === '모든 카테고리' ? null : target.dataset.value;
+        }
+        
+        updateAllFilterButtons();
+        applyAndRenderFilters();
+        closeAllDropdowns();
     }
     
-    function updateFilterButtonText(button, type, value) {
-        const span = button.querySelector('span');
-        const defaultText = { region: '지역', price: '가격', category: '카테고리', date: '날짜' }[type];
-        
-        if (!value || ['모두', '모든 카테고리', '전체'].includes(value)) {
-            span.textContent = defaultText;
-        } else if (value === '오늘' || value === getTodayString()) {
-            span.textContent = '오늘';
-        } else {
-            span.textContent = value;
-        }
+    // 모든 필터 버튼의 텍스트를 중앙에서 관리하여 업데이트
+    function updateAllFilterButtons() {
+        filterButtons.forEach(button => {
+            const type = button.dataset.filter;
+            const span = button.querySelector('span');
+            let value = '';
+
+            switch (type) {
+                case 'date':
+                    if (activeFilters.date === getTodayString()) { value = '오늘'; } 
+                    else if (activeFilters.date) { value = `${activeFilters.date.substring(4, 6)}.${activeFilters.date.substring(6, 8)}`; }
+                    break;
+                case 'region':
+                    if (activeFilters.sido && activeFilters.sigungu) { value = `${activeFilters.sido} ${activeFilters.sigungu}`; } 
+                    else if (activeFilters.sido) { value = activeFilters.sido; }
+                    break;
+                case 'price':
+                    value = activeFilters.price;
+                    break;
+                case 'category':
+                    value = activeFilters.category;
+                    break;
+            }
+            const defaultText = { region: '지역', price: '가격', category: '카테고리', date: '날짜' }[type];
+            span.textContent = value || defaultText;
+        });
     }
 
-    document.addEventListener('click', (e) => { if (!dropdownContainer.contains(e.target) && !document.getElementById('filter-bar').contains(e.target)) closeAllDropdowns(); });
+    document.addEventListener('click', (e) => { 
+        if (dropdownContainer.innerHTML !== '' && !dropdownContainer.contains(e.target) && !e.target.closest('.filter-btn')) {
+            closeAllDropdowns();
+        }
+    });
 });

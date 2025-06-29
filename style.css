@@ -22,11 +22,21 @@ body {
 body.modal-open { overflow: hidden; }
 
 /* --- 전체 너비 요소들 (헤더, 필터) --- */
-header, #filter-bar {
+header {
     background-color: var(--secondary-bg);
     border-bottom: 1px solid var(--border-color);
 }
-#filter-bar { position: sticky; top: 0; z-index: 100; }
+
+.sticky-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+#filter-bar { 
+    background-color: var(--secondary-bg);
+    border-bottom: 1px solid var(--border-color);
+}
 
 /* --- 콘텐츠 중앙 정렬 래퍼 --- */
 .content-wrapper { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
@@ -35,7 +45,7 @@ header .content-wrapper { padding-top: 24px; padding-bottom: 24px; }
 header h1 { font-size: 28px; font-weight: 700; }
 
 /* --- 필터 바 스크롤 컨테이너 --- */
-.filter-scroll-container { display: flex; overflow-x: auto; white-space: nowrap; -ms-overflow-style: none; scrollbar-width: none; }
+.filter-scroll-container { display: flex; align-items: center; overflow-x: auto; white-space: nowrap; -ms-overflow-style: none; scrollbar-width: none; }
 .filter-scroll-container::-webkit-scrollbar { display: none; }
 .filter-btn { display: flex; align-items: center; gap: 8px; background-color: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); padding: 10px 16px; border-radius: 30px; margin-right: 12px; font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s ease-in-out; flex-shrink: 0; }
 .filter-btn svg { width: 18px; height: 18px; stroke: var(--text-secondary); transition: all 0.2s ease-in-out; }
@@ -43,16 +53,59 @@ header h1 { font-size: 28px; font-weight: 700; }
 .filter-btn.active { background-color: var(--accent-color-light); color: var(--accent-color); border-color: var(--accent-color); font-weight: 700; }
 .filter-btn.active svg { stroke: var(--accent-color); }
 
+/* 필터 초기화 버튼 스타일 */
+/* 필터 초기화 버튼 스타일 */
+.reset-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    width: 42px; 
+    height: 42px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease-in-out;
+}
+.reset-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--text-secondary);
+    transition: transform 0.4s ease;
+}
+.reset-btn:hover {
+    background-color: #f0f0f0;
+    border-color: #d1d1d1;
+}
+.reset-btn:hover svg {
+    transform: rotate(-360deg);
+}
+
+
 /* --- 메인 콘텐츠 컨테이너 --- */
 #app-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
 /* --- 드롭다운 메뉴 --- */
-#dropdown-container { position: relative; z-index: 99; transition: height 0.3s ease; }
-.dropdown-menu { display: none; position: absolute; top: 10px; left: 0; right: 0; background-color: var(--secondary-bg); border-radius: 12px; padding: 20px; animation: fadeIn 0.3s ease; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); border: 1px solid var(--border-color); }
+#dropdown-container-wrapper {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 100%; /* 필터바 바로 아래에 위치 */
+}
+#dropdown-container { 
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative; 
+    z-index: 99; 
+    transition: height 0.3s ease; 
+}
+.dropdown-menu { display: none; position: absolute; top: 10px; left: 20px; right: 20px; background-color: var(--secondary-bg); border-radius: 12px; padding: 20px; animation: fadeIn 0.3s ease; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); border: 1px solid var(--border-color); }
 .dropdown-menu.show { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* --- [수정] 캘린더 전체 --- */
+/* --- 캘린더 전체 --- */
 .calendar-nav { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; }
 .current-year-month { font-size: 18px; font-weight: 500; }
 .calendar-nav-btn { background: transparent; border: none; cursor: pointer; padding: 5px; border-radius: 50%; width: 36px; height: 36px; display: inline-flex; justify-content: center; align-items: center; }
@@ -60,7 +113,6 @@ header h1 { font-size: 28px; font-weight: 700; }
 .calendar-nav-btn svg { width: 20px; height: 20px; stroke: var(--text-secondary); }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
 .calendar-header { font-weight: 500; color: var(--text-secondary); padding-bottom: 10px; font-size: 14px; }
-/* [수정] 날짜 버튼 스타일 */
 .calendar-day {
     background: transparent;
     border: none;
