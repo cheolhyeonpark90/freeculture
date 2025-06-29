@@ -1,5 +1,14 @@
 import { regionData, categoryData, ITEMS_PER_LOAD } from './config.js';
-import { appendEvents, resetEventList, openModal, createRegionSelector, updateSigunguList, createOptionList } from './ui.js';
+import { appendEvents, resetEventList, openModal, createRegionSelector, updateSigunguList, createOptionList, renderCalendar } from './ui.js';
+
+// --- 유틸리티 함수 ---
+function getTodayString() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}${month}${day}`;
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
     // --- DOM 요소 및 상태 변수 초기화 ---
@@ -12,19 +21,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     let isLoading = false;
     let observer;
 
+    let calendarDisplayDate = new Date(); // 캘린더 UI 표시용 날짜
+
+    // 페이지 로드 시 오늘 날짜를 기본 필터로 설정
     const activeFilters = {
-        sido: null, sigungu: null, price: null, category: null, date: null,
+        sido: null, sigungu: null, price: null, category: null, date: getTodayString(),
     };
 
-    // --- 데이터 로딩 ---
+    // --- 데이터 로딩 및 초기화 ---
     try {
         const response = await fetch('./freeculture_data.json');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         allEvents = await response.json();
-        applyAndRenderFilters();
+        initialize();
     } catch (error) {
         console.error("이벤트 데이터를 불러오는 데 실패했습니다:", error);
         document.getElementById('event-list').innerHTML = '<p style="text-align:center; padding: 40px; color: var(--text-secondary);">문화 행사 정보를 불러오지 못했습니다.<br>로컬 서버를 실행했는지 확인해주세요.</p>';
+    }
+
+    // 초기화 함수
+    function initialize() {
+        updateFilterButtonText(document.querySelector('[data-filter="date"]'), 'date', '오늘');
+        applyAndRenderFilters();
     }
 
     // --- 렌더링 및 필터링 핵심 함수 ---
@@ -33,20 +51,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             const sidoMatch = !activeFilters.sido || event.area === activeFilters.sido;
             const sigunguMatch = !activeFilters.sigungu || event.sigungu === activeFilters.sigungu;
             
-            // [수정] 가격 필터 로직 변경
-            let priceMatch = true; // 기본값은 항상 통과
-            if (activeFilters.price) { // '모두'가 아닌 경우에만 필터링
-                if (activeFilters.price === '무료') {
-                    // '무료' 필터 선택 시: price 문자열에 '무료'가 포함된 경우
-                    priceMatch = event.price.includes('무료');
-                } else { // '유료' 필터 선택 시
-                    // price 문자열에 '무료'가 포함되지 않은 모든 경우
-                    priceMatch = !event.price.includes('무료');
-                }
+            let priceMatch = true;
+            if (activeFilters.price) {
+                priceMatch = activeFilters.price === '무료' ? event.price.includes('무료') : !event.price.includes('무료');
             }
 
             const categoryMatch = !activeFilters.category || event.realmName === activeFilters.category;
-            return sidoMatch && sigunguMatch && priceMatch && categoryMatch;
+            
+            const dateMatch = !activeFilters.date || 
+                (Number(event.startDate) <= Number(activeFilters.date) && 
+                 Number(event.endDate) >= Number(activeFilters.date));
+
+            return sidoMatch && sigunguMatch && priceMatch && categoryMatch && dateMatch;
         });
         resetEventList();
         renderedCount = 0;
@@ -69,7 +85,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 300);
     }
     
-    // --- 무한 스크롤 설정 ---
     function setupIntersectionObserver() {
         if (observer) observer.disconnect();
         const oldSentinel = document.getElementById('sentinel');
@@ -114,26 +129,73 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function openDropdown(type, button) {
         let content = '';
-        if (type === 'date') { /* renderCalendar(); */ return; }
-        switch (type) {
-            case 'region': content = createRegionSelector(Object.keys(regionData)); break;
-            case 'price': content = createOptionList(['모두', '무료', '유료']); break;
-            case 'category': content = createOptionList(["모든 카테고리", ...categoryData]); break;
+        if (type === 'date') {
+            content = renderCalendar(calendarDisplayDate, activeFilters.date);
+        } else {
+            switch (type) {
+                case 'region': content = createRegionSelector(Object.keys(regionData)); break;
+                case 'price': content = createOptionList(['모두', '무료', '유료']); break;
+                case 'category': content = createOptionList(["모든 카테고리", ...categoryData]); break;
+            }
         }
+        
         const menu = document.createElement('div');
         menu.className = 'dropdown-menu show';
         menu.innerHTML = content;
         dropdownContainer.appendChild(menu);
-        menu.addEventListener('click', (e) => handleFilterSelection(e, type, button));
+        
+        const eventHandler = (type === 'date') ? handleCalendarClick : handleFilterSelection;
+        menu.addEventListener('click', (e) => eventHandler(e, type, button));
+        
         dropdownContainer.style.height = `${menu.scrollHeight + 20}px`;
         const filterBar = document.getElementById('filter-bar').querySelector('.filter-scroll-container');
         filterBar.scrollTo({ left: button.offsetLeft - 20, behavior: 'smooth' });
     }
 
+    function handleCalendarClick(e, type, filterButton) {
+        const target = e.target.closest('button');
+        if (!target) return;
+
+        const action = target.dataset.action;
+        const dateStr = target.dataset.date;
+
+        if (['prev-year', 'next-year', 'prev-month', 'next-month'].includes(action)) {
+            // [수정] 이벤트 전파를 막아 document의 클릭 리스너가 동작하지 않도록 합니다.
+            e.stopPropagation();
+            
+            if (action === 'prev-month') calendarDisplayDate.setMonth(calendarDisplayDate.getMonth() - 1);
+            if (action === 'next-month') calendarDisplayDate.setMonth(calendarDisplayDate.getMonth() + 1);
+            if (action === 'prev-year') calendarDisplayDate.setFullYear(calendarDisplayDate.getFullYear() - 1);
+            if (action === 'next-year') calendarDisplayDate.setFullYear(calendarDisplayDate.getFullYear() + 1);
+            
+            const newContent = renderCalendar(calendarDisplayDate, activeFilters.date);
+            dropdownContainer.querySelector('.dropdown-menu').innerHTML = newContent;
+            return;
+        }
+
+        if (action === 'select-today') {
+            activeFilters.date = getTodayString();
+            calendarDisplayDate = new Date();
+            updateFilterButtonText(filterButton, 'date', '오늘');
+        } else if (action === 'deselect-date') {
+            activeFilters.date = null;
+            updateFilterButtonText(filterButton, 'date', null);
+        } else if (dateStr) {
+            activeFilters.date = dateStr;
+            const year = dateStr.substring(0, 4);
+            const month = dateStr.substring(4, 6);
+            const day = dateStr.substring(6, 8);
+            updateFilterButtonText(filterButton, 'date', `${year}.${month}.${day}`);
+        }
+        
+        applyAndRenderFilters();
+        closeAllDropdowns();
+    }
+
+
     function handleFilterSelection(e, type, button) {
         const target = e.target.closest('.region-item, .option-item');
         if (!target) return;
-
         if (type === 'region') {
             if (target.parentElement.classList.contains('sido-col')) {
                 const selectedSido = target.dataset.value;
@@ -151,7 +213,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     updateSigunguList(selectedSido, target.closest('.dropdown-menu'));
                     updateFilterButtonText(button, 'region', selectedSido);
                 }
-            } else { // 시/군/구 선택
+            } else {
                 const selectedSigungu = target.dataset.value;
                 if (selectedSigungu === '전체') {
                     activeFilters.sigungu = null;
@@ -163,7 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 closeAllDropdowns();
                 applyAndRenderFilters();
             }
-        } else { // 가격, 카테고리 필터
+        } else {
             const value = target.dataset.value;
             if (type === 'price') activeFilters.price = (value === '모두' || !value) ? null : value;
             if (type === 'category') activeFilters.category = (value === '모든 카테고리' || !value) ? null : value;
@@ -175,8 +237,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     function updateFilterButtonText(button, type, value) {
         const span = button.querySelector('span');
-        const defaultText = { region: '지역', price: '가격', category: '카테고리' }[type];
-        span.textContent = (!value || value === '모두' || value === '모든 카테고리' || value === '전체') ? defaultText : value;
+        const defaultText = { region: '지역', price: '가격', category: '카테고리', date: '날짜' }[type];
+        
+        if (!value || ['모두', '모든 카테고리', '전체'].includes(value)) {
+            span.textContent = defaultText;
+        } else if (value === '오늘' || value === getTodayString()) {
+            span.textContent = '오늘';
+        } else {
+            span.textContent = value;
+        }
     }
 
     document.addEventListener('click', (e) => { if (!dropdownContainer.contains(e.target) && !document.getElementById('filter-bar').contains(e.target)) closeAllDropdowns(); });

@@ -52,18 +52,39 @@ header h1 { font-size: 28px; font-weight: 700; }
 .dropdown-menu.show { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* 캘린더 */
+/* --- [수정] 캘린더 전체 --- */
 .calendar-nav { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; }
-#current-year-month { font-size: 18px; font-weight: 500; }
-.calendar-nav-btn { background: transparent; border: none; cursor: pointer; padding: 5px; }
-.calendar-nav-btn svg { width: 20px; height: 20px; stroke: var(--text-secondary); transition: stroke 0.2s; }
-.calendar-nav-btn:hover svg { stroke: var(--text-primary); }
-.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
+.current-year-month { font-size: 18px; font-weight: 500; }
+.calendar-nav-btn { background: transparent; border: none; cursor: pointer; padding: 5px; border-radius: 50%; width: 36px; height: 36px; display: inline-flex; justify-content: center; align-items: center; }
+.calendar-nav-btn:hover { background-color: #f0f0f0; }
+.calendar-nav-btn svg { width: 20px; height: 20px; stroke: var(--text-secondary); }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
 .calendar-header { font-weight: 500; color: var(--text-secondary); padding-bottom: 10px; font-size: 14px; }
-.calendar-day { padding: 8px 0; cursor: pointer; border-radius: 50%; font-size: 15px; transition: background-color 0.2s; }
-.calendar-day:hover { background-color: var(--accent-color-light); }
-.calendar-day.today { background-color: var(--accent-color); color: var(--secondary-bg); font-weight: bold; }
+/* [수정] 날짜 버튼 스타일 */
+.calendar-day {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    padding: 0;
+    margin: 0 auto;
+    border-radius: 50%;
+    font-size: 15px;
+    transition: background-color 0.2s, color 0.2s;
+}
 .calendar-day.empty { cursor: default; background-color: transparent !important; }
+.calendar-day:not(.empty):hover { background-color: var(--accent-color-light); }
+.calendar-day.selected {
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: bold;
+}
+.calendar-footer { display: flex; justify-content: space-between; padding-top: 15px; border-top: 1px solid var(--border-color); }
+.calendar-action-btn { background: var(--accent-color-light); color: var(--accent-color); border: none; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 0.2s; }
+.calendar-action-btn:hover { background-color: #d0e6ff; }
+
 
 /* 지역 선택기 & 옵션 리스트 */
 .region-selector { display: flex; gap: 10px; }
@@ -79,7 +100,6 @@ header h1 { font-size: 28px; font-weight: 700; }
 #event-list { padding-top: 20px; padding-bottom: 20px; display: grid; grid-template-columns: 1fr; gap: 24px; }
 @media (min-width: 640px) { #event-list { grid-template-columns: repeat(2, 1fr); } }
 @media (min-width: 1024px) { #event-list { grid-template-columns: repeat(3, 1fr); } }
-
 .event-card { background-color: var(--secondary-bg); border-radius: 16px; overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; border: 1px solid var(--border-color); }
 .event-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1); }
 .event-card .thumbnail { width: 100%; height: 180px; object-fit: cover; background-color: #eee; display: block; }
@@ -115,21 +135,6 @@ header h1 { font-size: 28px; font-weight: 700; }
 @media (min-width: 640px) { .modal-info-grid { grid-template-columns: repeat(2, 1fr); } }
 
 /* --- 무한 스크롤 로더 --- */
-#loader {
-    display: none;
-    padding: 20px;
-    text-align: center;
-}
-.spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid var(--accent-color-light);
-    border-top-color: var(--accent-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto;
-}
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
+#loader { display: none; padding: 20px; text-align: center; }
+.spinner { width: 40px; height: 40px; border: 4px solid var(--accent-color-light); border-top-color: var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
+@keyframes spin { to { transform: rotate(360deg); } }
