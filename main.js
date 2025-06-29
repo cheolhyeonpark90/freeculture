@@ -32,7 +32,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentEvents = allEvents.filter(event => {
             const sidoMatch = !activeFilters.sido || event.area === activeFilters.sido;
             const sigunguMatch = !activeFilters.sigungu || event.sigungu === activeFilters.sigungu;
-            const priceMatch = !activeFilters.price || event.price === activeFilters.price;
+            
+            // [수정] 가격 필터 로직 변경
+            let priceMatch = true; // 기본값은 항상 통과
+            if (activeFilters.price) { // '모두'가 아닌 경우에만 필터링
+                if (activeFilters.price === '무료') {
+                    // '무료' 필터 선택 시: price 문자열에 '무료'가 포함된 경우
+                    priceMatch = event.price.includes('무료');
+                } else { // '유료' 필터 선택 시
+                    // price 문자열에 '무료'가 포함되지 않은 모든 경우
+                    priceMatch = !event.price.includes('무료');
+                }
+            }
+
             const categoryMatch = !activeFilters.category || event.realmName === activeFilters.category;
             return sidoMatch && sigunguMatch && priceMatch && categoryMatch;
         });
@@ -102,7 +114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function openDropdown(type, button) {
         let content = '';
-        if (type === 'date') { /* renderCalendar(); */ return; } // 캘린더 기능은 일단 보류
+        if (type === 'date') { /* renderCalendar(); */ return; }
         switch (type) {
             case 'region': content = createRegionSelector(Object.keys(regionData)); break;
             case 'price': content = createOptionList(['모두', '무료', '유료']); break;
@@ -121,23 +133,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     function handleFilterSelection(e, type, button) {
         const target = e.target.closest('.region-item, .option-item');
         if (!target) return;
+
         if (type === 'region') {
             if (target.parentElement.classList.contains('sido-col')) {
                 const selectedSido = target.dataset.value;
-                activeFilters.sido = selectedSido === '전체' ? null : selectedSido;
-                activeFilters.sigungu = null;
-                target.parentElement.querySelectorAll('.region-item').forEach(item => item.classList.remove('selected'));
-                target.classList.add('selected');
-                updateSigunguList(selectedSido, target.closest('.dropdown-menu'));
-                updateFilterButtonText(button, '지역', activeFilters.sido);
-                if (activeFilters.sido === null) { applyAndRenderFilters(); closeAllDropdowns(); }
-            } else {
-                activeFilters.sigungu = target.dataset.value;
-                updateFilterButtonText(button, '지역', `${activeFilters.sido} ${activeFilters.sigungu}`);
+                if (selectedSido === '전체') {
+                    activeFilters.sido = null;
+                    activeFilters.sigungu = null;
+                    updateFilterButtonText(button, 'region', '전체');
+                    applyAndRenderFilters();
+                    closeAllDropdowns();
+                } else {
+                    activeFilters.sido = selectedSido;
+                    activeFilters.sigungu = null;
+                    target.parentElement.querySelectorAll('.region-item').forEach(item => item.classList.remove('selected'));
+                    target.classList.add('selected');
+                    updateSigunguList(selectedSido, target.closest('.dropdown-menu'));
+                    updateFilterButtonText(button, 'region', selectedSido);
+                }
+            } else { // 시/군/구 선택
+                const selectedSigungu = target.dataset.value;
+                if (selectedSigungu === '전체') {
+                    activeFilters.sigungu = null;
+                    updateFilterButtonText(button, 'region', activeFilters.sido);
+                } else {
+                    activeFilters.sigungu = selectedSigungu;
+                    updateFilterButtonText(button, 'region', `${activeFilters.sido} ${activeFilters.sigungu}`);
+                }
                 closeAllDropdowns();
                 applyAndRenderFilters();
             }
-        } else {
+        } else { // 가격, 카테고리 필터
             const value = target.dataset.value;
             if (type === 'price') activeFilters.price = (value === '모두' || !value) ? null : value;
             if (type === 'category') activeFilters.category = (value === '모든 카테고리' || !value) ? null : value;

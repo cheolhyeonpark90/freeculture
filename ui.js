@@ -37,18 +37,15 @@ export function openModal(event) {
     const formatDate = (dateStr) => !dateStr || dateStr.length !== 8 ? "정보 없음" : `${dateStr.substring(0, 4)}.${dateStr.substring(4, 6)}.${dateStr.substring(6, 8)}`;
     const secureImgUrl = event.imgUrl.replace('http://', 'https://');
     
-    // url이 없으면 placeUrl을 사용하고, 둘 다 없으면 버튼을 렌더링하지 않습니다.
     const websiteUrl = event.url || event.placeUrl;
     const websiteButtonHtml = websiteUrl 
         ? `<a href="${websiteUrl}" target="_blank" class="action-btn primary">공식 홈페이지</a>`
         : '';
         
-    // [수정] gpsX와 gpsY 좌표가 모두 있을 때만 '지도 보기' 버튼을 생성합니다.
     const hasGpsData = event.gpsX && event.gpsY;
     const mapButtonHtml = hasGpsData
         ? `<a href="https://map.kakao.com/link/to/${event.place},${event.gpsY},${event.gpsX}" target="_blank" class="action-btn secondary">지도 보기</a>`
         : '';
-
 
     modalContent.innerHTML = `
         <div class="modal-header">
@@ -101,9 +98,18 @@ export function createRegionSelector(sidoList) {
 }
 
 export function updateSigunguList(sido, menu) {
-    const sigunguCol = menu.querySelector('#sigungu-col'); if (!sigunguCol) return;
+    const sigunguCol = menu.querySelector('#sigungu-col'); 
+    if (!sigunguCol) return;
     const sigunguList = regionData[sido] || [];
-    sigunguCol.innerHTML = sigunguList.length > 0 ? sigunguList.map(s => `<div class="region-item" data-value="${s}">${s}</div>`).join('') : `<div style="text-align:center; color: var(--text-secondary); padding-top: 20px;"></div>`;
+    
+    // [수정] 시/군/구 목록에 '전체' 옵션을 추가합니다.
+    let sigunguHtml = '';
+    if (sigunguList.length > 0) {
+        sigunguHtml = [`<div class="region-item" data-value="전체">전체</div>`, ...sigunguList.map(s => `<div class="region-item" data-value="${s}">${s}</div>`)].join('');
+    } else {
+        sigunguHtml = `<div style="text-align:center; color: var(--text-secondary); padding-top: 20px;"></div>`; // 데이터 없으면 빈칸
+    }
+    sigunguCol.innerHTML = sigunguHtml;
 }
 
 export function createOptionList(options) {
