@@ -19,6 +19,6 @@ export const regionData = {
     "제주": ["서귀포시", "제주시"]
 };
 
-export const categoryData = ["교육/체험", "국악", "기타", "무용/발레", "뮤지컬/오페라", "아동/가족", "연극", "음악/콘서트", "전시", "행사/축제"];
+export const categoryData = ["교육/체험", "전시", "음악/콘서트", "연극", "국악", "뮤지컬/오페라", "무용/발레", "행사/축제", "아동/가족", "기타"];
 
 export const ITEMS_PER_LOAD = 21; // 한 번에 로드할 아이템 수
