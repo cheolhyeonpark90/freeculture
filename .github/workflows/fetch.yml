@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
 
   # ➋ main 브랜치에 커밋이 올라올 때마다 실행
-  push:
-    branches: [main]
+  # push:
+  #   branches: [main]
 
   # ➌ 매일 오전 10:00 KST(= 01:00 UTC) 자동 실행
   schedule:
