@@ -1,0 +1,19 @@
+# Node.js
+node_modules/
+.env
+freeculture_data.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Logs
+*.log
+
+# others
+*.zip

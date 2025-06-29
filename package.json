@@ -1,0 +1,26 @@
+{
+    "name": "freeculture",
+    "type": "module",
+    "version": "1.0.0",
+    "dependencies": {
+        "axios": "^1.6.10",
+        "dotenv": "^16.4.5"
+    },
+    "description": "",
+    "main": "fetch.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/cheolhyeonpark90/freeculture.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/cheolhyeonpark90/freeculture/issues"
+    },
+    "homepage": "https://github.com/cheolhyeonpark90/freeculture#readme",
+    "devDependencies": {}
+}
