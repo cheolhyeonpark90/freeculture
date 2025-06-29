@@ -43,9 +43,12 @@ export function openModal(event) {
         : '';
         
     const hasGpsData = event.gpsX && event.gpsY;
+    // [수정] 모바일 앱을 직접 호출하는 URL 스킴 방식으로 변경합니다.
+    const mapLink = `kakaomap://look?p=${event.gpsY},${event.gpsX}`;
     const mapButtonHtml = hasGpsData
-        ? `<a href="https://map.kakao.com/link/to/${event.place},${event.gpsY},${event.gpsX}" target="_blank" class="action-btn secondary">지도 보기</a>`
+        ? `<a href="${mapLink}" class="action-btn secondary">지도 앱으로 보기</a>`
         : '';
+
 
     modalContent.innerHTML = `
         <div class="modal-header">
@@ -102,12 +105,11 @@ export function updateSigunguList(sido, menu) {
     if (!sigunguCol) return;
     const sigunguList = regionData[sido] || [];
     
-    // [수정] 시/군/구 목록에 '전체' 옵션을 추가합니다.
     let sigunguHtml = '';
     if (sigunguList.length > 0) {
         sigunguHtml = [`<div class="region-item" data-value="전체">전체</div>`, ...sigunguList.map(s => `<div class="region-item" data-value="${s}">${s}</div>`)].join('');
     } else {
-        sigunguHtml = `<div style="text-align:center; color: var(--text-secondary); padding-top: 20px;"></div>`; // 데이터 없으면 빈칸
+        sigunguHtml = `<div style="text-align:center; color: var(--text-secondary); padding-top: 20px;"></div>`;
     }
     sigunguCol.innerHTML = sigunguHtml;
 }
