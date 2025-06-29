@@ -1,0 +1,190 @@
+/* --- 기본 & 테마 설정 --- */
+:root {
+    --primary-bg: #F7F9FC;
+    --secondary-bg: #FFFFFF;
+    --text-primary: #0C1E42;
+    --text-secondary: #5F6B7A;
+    --accent-color: #007AFF;
+    --accent-color-light: #E5F2FF;
+    --border-color: #E1E5EA;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: var(--primary-bg);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body.modal-open { overflow: hidden; }
+
+/* --- 전체 너비 요소들 (헤더, 필터) --- */
+header, #filter-bar {
+    background-color: var(--secondary-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+#filter-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* --- 콘텐츠 중앙 정렬 래퍼 --- */
+.content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+header .content-wrapper {
+    padding-top: 24px;
+    padding-bottom: 24px;
+}
+
+#filter-bar .content-wrapper {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+header h1 {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+/* --- 필터 바 스크롤 컨테이너 --- */
+.filter-scroll-container {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.filter-scroll-container::-webkit-scrollbar { display: none; }
+
+.filter-btn {
+    display: flex; align-items: center; gap: 8px;
+    background-color: transparent; color: var(--text-secondary);
+    border: 1px solid var(--border-color); padding: 10px 16px;
+    border-radius: 30px; margin-right: 12px;
+    font-size: 15px; font-weight: 500; cursor: pointer;
+    transition: all 0.2s ease-in-out; flex-shrink: 0;
+}
+.filter-btn svg { width: 18px; height: 18px; stroke: var(--text-secondary); transition: all 0.2s ease-in-out; }
+.filter-btn:hover { background-color: #F0F0F0; border-color: #d1d1d1; }
+.filter-btn.active { background-color: var(--accent-color-light); color: var(--accent-color); border-color: var(--accent-color); font-weight: 700; }
+.filter-btn.active svg { stroke: var(--accent-color); }
+
+/* --- 메인 콘텐츠 컨테이너 --- */
+#app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- 드롭다운 메뉴 --- */
+#dropdown-container {
+    position: relative;
+    z-index: 99;
+    /* padding: 0 20px; 이제 부모인 #app-container가 처리 */
+    transition: height 0.3s ease;
+}
+
+.dropdown-menu {
+    display: none; position: absolute;
+    top: 10px; left: 0; right: 0; /* 이제 부모에 꽉 참 */
+    background-color: var(--secondary-bg);
+    border-radius: 12px; padding: 20px;
+    animation: fadeIn 0.3s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border-color);
+}
+.dropdown-menu.show { display: block; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 캘린더 */
+.calendar-nav { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; }
+#current-year-month { font-size: 18px; font-weight: 500; }
+.calendar-nav-btn { background: transparent; border: none; cursor: pointer; padding: 5px; }
+.calendar-nav-btn svg { width: 20px; height: 20px; stroke: var(--text-secondary); transition: stroke 0.2s; }
+.calendar-nav-btn:hover svg { stroke: var(--text-primary); }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; }
+.calendar-header { font-weight: 500; color: var(--text-secondary); padding-bottom: 10px; font-size: 14px; }
+.calendar-day { padding: 8px 0; cursor: pointer; border-radius: 50%; font-size: 15px; transition: background-color 0.2s; }
+.calendar-day:hover { background-color: var(--accent-color-light); }
+.calendar-day.today { background-color: var(--accent-color); color: var(--secondary-bg); font-weight: bold; }
+.calendar-day.empty { cursor: default; background-color: transparent !important; }
+
+/* 지역 선택기 & 옵션 리스트 */
+.region-selector { display: flex; gap: 10px; }
+.region-col { flex: 1; height: 220px; overflow-y: auto; background-color: var(--primary-bg); border-radius: 8px; padding: 8px; }
+.region-item { padding: 12px; cursor: pointer; border-radius: 6px; font-size: 15px; transition: background-color 0.2s, color 0.2s; }
+.region-item:hover { background-color: var(--accent-color-light); }
+.region-item.selected { background-color: var(--accent-color); color: var(--secondary-bg); font-weight: 500; }
+.option-list { display: flex; flex-wrap: wrap; gap: 10px; }
+.option-item { background-color: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); padding: 10px 18px; border-radius: 20px; cursor: pointer; font-size: 15px; transition: all 0.2s; }
+.option-item:hover { background-color: var(--accent-color-light); border-color: var(--accent-color); color: var(--accent-color); }
+
+/* --- 이벤트 목록 --- */
+#event-list {
+    padding-top: 20px; /* 위아래 패딩만 필요 */
+    padding-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+@media (min-width: 640px) {
+    #event-list { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+    #event-list { grid-template-columns: repeat(3, 1fr); }
+}
+
+.event-card {
+    background-color: var(--secondary-bg); border-radius: 16px;
+    overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer; border: 1px solid var(--border-color);
+}
+.event-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1); }
+.event-card .thumbnail { width: 100%; height: 180px; object-fit: cover; background-color: #eee; display: block; }
+.event-info { padding: 16px; }
+.event-info .category-tag { font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; }
+.event-info h3 { font-size: 18px; font-weight: 700; margin: 0 0 8px 0; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; min-height: 48px; }
+.event-info .location-info { font-size: 14px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin-top: 12px; }
+.event-info .location-info svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* --- 상세 정보 모달 --- */
+#modal-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s ease; }
+#modal-container.hidden { opacity: 0; pointer-events: none; }
+.modal-backdrop { position: absolute; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); }
+.modal-content { position: relative; background-color: var(--secondary-bg); width: 90%; max-width: 700px; max-height: 90vh; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; transform: scale(0.95); transition: transform 0.3s ease; }
+#modal-container:not(.hidden) .modal-content { transform: scale(1); }
+.modal-header img { width: 100%; height: 250px; object-fit: cover; display: block; }
+.modal-body { padding: 24px 30px; overflow-y: auto; }
+.modal-close-btn { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; background-color: rgba(0,0,0,0.3); color: white; border: none; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.modal-body h2 { font-size: 26px; font-weight: 700; margin-bottom: 12px; }
+.modal-info-grid { display: grid; grid-template-columns: 1fr; gap: 16px; padding: 20px 0; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); margin: 20px 0; }
+.info-item { display: flex; align-items: flex-start; gap: 12px; }
+.info-item svg { width: 20px; height: 20px; flex-shrink: 0; stroke: var(--accent-color); margin-top: 2px; }
+.info-item div { font-size: 15px; }
+.info-item strong { font-weight: 500; color: var(--text-primary); }
+.info-item span { color: var(--text-secondary); }
+.modal-description p { font-size: 16px; line-height: 1.7; color: var(--text-secondary); }
+.modal-footer { padding: 20px 30px; border-top: 1px solid var(--border-color); display: flex; gap: 12px; }
+.action-btn { flex-grow: 1; text-align: center; padding: 14px; border-radius: 10px; text-decoration: none; font-weight: 500; font-size: 16px; transition: background-color 0.2s; }
+.action-btn.primary { background-color: var(--accent-color); color: white; }
+.action-btn.primary:hover { background-color: #0056b3; }
+.action-btn.secondary { background-color: var(--accent-color-light); color: var(--accent-color); }
+.action-btn.secondary:hover { background-color: #d0e6ff; }
+
+@media (min-width: 640px) {
+    .modal-info-grid { grid-template-columns: repeat(2, 1fr); }
+}

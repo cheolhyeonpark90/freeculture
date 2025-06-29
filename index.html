@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>무료한 문화생활</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header: 이제 body의 직속 자식으로 전체 너비를 가집니다. -->
+    <header>
+        <div class="content-wrapper">
+            <h1>무료한 문화생활 ✨</h1>
+        </div>
+    </header>
+
+    <!-- Filter Bar: Header와 마찬가지로 전체 너비를 가집니다. -->
+    <nav id="filter-bar">
+        <div class="content-wrapper">
+            <div class="filter-scroll-container">
+                <button class="filter-btn" data-filter="date">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <span>오늘</span>
+                </button>
+                <button class="filter-btn" data-filter="region">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <span>지역</span>
+                </button>
+                <button class="filter-btn" data-filter="price">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                    <span>가격</span>
+                </button>
+                <button class="filter-btn" data-filter="category">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2 18.28V22h3.72l14.92-14.92a1.21 1.21 0 0 0 0-1.72z"></path><path d="m14 6 6 6"></path></svg>
+                    <span>카테고리</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- App Container: 이제 메인 콘텐츠(드롭다운, 이벤트 목록)만 감쌉니다. -->
+    <div id="app-container">
+        <div id="dropdown-container">
+            <!-- 드롭다운 메뉴가 여기에 동적으로 생성됩니다 -->
+        </div>
+
+        <main id="event-list">
+            <!-- 이벤트 카드 목록이 여기에 동적으로 생성됩니다 -->
+        </main>
+    </div>
+
+    <!-- 상세 정보 모달 -->
+    <div id="modal-container" class="hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <!-- 상세 정보가 여기에 동적으로 채워집니다 -->
+        </div>
+    </div>
+
+
+    <script src="script.js"></script>
+</body>
+</html>
