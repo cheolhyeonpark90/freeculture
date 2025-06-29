@@ -58,8 +58,7 @@ async function fetchDetail(seq, index, total) {
 
   const details = [];
 
-  // for (let i = 0; i < seqs.length; i++) {
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < seqs.length; i++) {
     const detail = await fetchDetail(seqs[i], i, seqs.length);
     if (detail) details.push(detail);
     await new Promise(r => setTimeout(r, 350)); // 초당 3건 제한 (350ms는 여유용)
