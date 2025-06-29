@@ -19,7 +19,7 @@ export function appendEvents(eventsToRender, openModalCallback) {
     eventsToRender.forEach((event) => {
         const card = document.createElement('div');
         card.className = 'event-card';
-        const priceTag = event.price === '무료' ? `<span style="color: var(--accent-color); font-weight: 500;">무료</span>` : '유료';
+        const priceTag = event.price.includes('무료') ? `<span style="color: var(--accent-color); font-weight: 500;">무료</span>` : '유료';
         const secureImgUrl = event.imgUrl.replace('http://', 'https://');
         card.innerHTML = `<img src="${secureImgUrl}" alt="${event.title}" class="thumbnail" onerror="this.src='https://placehold.co/600x400/E1E5EA/717171?text=Image+Not+Found'"><div class="event-info"><p class="category-tag">${event.realmName} &bull; ${priceTag}</p><h3>${event.title}</h3><div class="location-info"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg><span>${event.area} ${event.sigungu}</span></div></div>`;
         card.addEventListener('click', () => openModalCallback(event));
@@ -43,10 +43,22 @@ export function openModal(event) {
         : '';
         
     const hasGpsData = event.gpsX && event.gpsY;
-    // [수정] 모바일 앱을 직접 호출하는 URL 스킴 방식으로 변경합니다.
-    const mapLink = `kakaomap://look?p=${event.gpsY},${event.gpsX}`;
+
+    // 모바일과 웹 환경을 구분하여 다른 지도 링크를 생성합니다.
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    let mapLink = '';
+
+    if (isMobile) {
+        // 모바일일 경우: 카카오맵 앱 URL 스킴 사용
+        mapLink = `kakaomap://look?p=${event.gpsY},${event.gpsX}`;
+    } else {
+        // 웹일 경우: 카카오맵 웹페이지 링크 사용
+        mapLink = `https://map.kakao.com/link/to/${event.place},${event.gpsY},${event.gpsX}`;
+    }
+
+    // [수정] 버튼 텍스트를 '지도 보기'로 통일합니다.
     const mapButtonHtml = hasGpsData
-        ? `<a href="${mapLink}" class="action-btn secondary">지도 앱으로 보기</a>`
+        ? `<a href="${mapLink}" target="_blank" class="action-btn secondary">지도 보기</a>`
         : '';
 
 
