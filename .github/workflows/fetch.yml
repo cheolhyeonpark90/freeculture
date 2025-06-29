@@ -1,0 +1,47 @@
+name: FreeCulture 데이터 수집
+
+on:
+  # ➊ GitHub UI에서 언제든 직접 실행
+  workflow_dispatch:
+
+  # ➋ main 브랜치에 커밋이 올라올 때마다 실행
+  push:
+    branches: [main]
+
+  # ➌ 매일 오전 10:00 KST(= 01:00 UTC) 자동 실행
+  schedule:
+    - cron: '0 1 * * *'
+
+jobs:
+  fetch-and-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 코드 체크아웃
+      - name: 📦 Checkout
+        uses: actions/checkout@v4
+
+      # 2. Node.js 22 설치
+      - name: 🛠️ Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # 3. 필요한 패키지 설치 (axios·dotenv)
+      - name: 📦 Install dependencies
+        run: npm install axios dotenv
+
+      # 4. 데이터 수집 스크립트 실행
+      - name: 🏃 Run fetch.js
+        env:
+          FREE_CULTURE_API_KEY: ${{ secrets.FREE_CULTURE_API_KEY }}
+        run: node fetch.js
+
+      # 5. 결과 파일 커밋 & 푸시
+      - name: 💾 Commit and push result
+        run: |
+          git config user.name  "github-actions"
+          git config user.email "actions@github.com"
+          git add freeculture_data.json
+          git commit -m "🤖 자동 수집: $(date -u '+%Y-%m-%dT%H:%M:%SZ')" || echo "No changes"
+          git push
