@@ -55,14 +55,9 @@ export function openModal(event) {
         : '';
         
     const hasGpsData = event.gpsX && event.gpsY;
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    let mapLink = '';
-    if (isMobile) {
-        mapLink = `kakaomap://look?p=${event.gpsY},${event.gpsX}`;
-    } else {
-        mapLink = `https://map.kakao.com/link/to/${event.place},${event.gpsY},${event.gpsX}`;
-    }
+    const mapLink = `https://map.kakao.com/link/to/${event.place},${event.gpsY},${event.gpsX}`;
     const mapButtonHtml = hasGpsData
+        // [수정] 항상 mapLink 변수를 사용하도록 수정합니다.
         ? `<a href="${mapLink}" target="_blank" class="action-btn secondary">지도 보기</a>`
         : '';
         
