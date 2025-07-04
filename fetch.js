@@ -14,6 +14,8 @@ async function seqList() {
     responseType: 'text',
   });
 
+  console.log(data);
+
   const total = +data.match(/<totalCount>(\d+)<\/totalCount>/)[1];
   const pages = Math.ceil(total / ROWS);
   let seqs = [...data.matchAll(/<seq>(\d+)<\/seq>/g)].map(m => m[1]);
