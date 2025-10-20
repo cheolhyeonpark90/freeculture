@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- DOM 요소 및 상태 변수 초기화 ---
     const filterButtons = document.querySelectorAll('.filter-btn');
     const resetFiltersBtn = document.getElementById('reset-filters-btn');
+    const initialLoader = document.getElementById('initial-loader');
     const dropdownContainer = document.getElementById('dropdown-container');
     
     let allEvents = [];
@@ -39,6 +40,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         console.error("이벤트 데이터를 불러오는 데 실패했습니다:", error);
         document.getElementById('event-list').innerHTML = '<p style="text-align:center; padding: 40px; color: var(--text-secondary);">문화 행사 정보를 불러오지 못했습니다.<br>로컬 서버를 실행했는지 확인해주세요.</p>';
+    } finally {
+        initialLoader.style.opacity = '0';
+        setTimeout(() => initialLoader.remove(), 300);
     }
 
     function initialize() {
