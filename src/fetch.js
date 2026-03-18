@@ -1,5 +1,6 @@
 import axios from 'axios';
 import fs from 'fs/promises';
+import path from 'path';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -66,6 +67,9 @@ async function fetchDetail(seq, index, total) {
     await new Promise(r => setTimeout(r, 350)); // 초당 3건 제한 (350ms는 여유용)
   }
 
-  await fs.writeFile('freeculture_data.json', JSON.stringify(details, null, 2));
+  const outputDir = path.join(process.cwd(), 'public');
+  await fs.mkdir(outputDir, { recursive: true });
+  const outputPath = path.join(outputDir, 'freeculture_data.json');
+  await fs.writeFile(outputPath, JSON.stringify(details, null, 2));
   console.log('✅ 저장 완료!');
 })();
