@@ -131,14 +131,17 @@
                 // Actually, if we use [category], '/' is a path separator.
                 // Astro handles this by encoding or splitting. Wait, if we use [category] and the category has a slash, Astro will error unless we use [...category].
                 // Let's decode the rest of the path as the category.
-                const pathCategory = decodeURIComponent(pathSegments.slice(3).join('/')); 
+                // NOTE: /category/전시/ 처럼 끝에 슬래시가 붙는 경우를 위해 마지막 '/'는 제거한다.
+                const rawRegionCategory = decodeURIComponent(pathSegments.slice(3).join('/'));
+                const pathCategory = rawRegionCategory.replace(/\/$/, ''); 
                 if (categoryData.includes(pathCategory)) {
                     initialCategory = pathCategory;
                 }
             }
         } else if (currentPath.startsWith('/category/')) {
             const pathSegments = currentPath.split('/');
-            const pathCategory = decodeURIComponent(pathSegments.slice(2).join('/')); 
+            const rawCategoryPath = decodeURIComponent(pathSegments.slice(2).join('/'));
+            const pathCategory = rawCategoryPath.replace(/\/$/, '');
             if (categoryData.includes(pathCategory)) {
                 initialCategory = pathCategory;
                 useTodayDefault = false;
