@@ -1,0 +1,38 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import FilterApp from '../../components/FilterApp.astro';
+import EventCard from '../../components/EventCard.astro';
+import { getEventsByRegion } from '../../lib/data.js';
+import { regionData, ITEMS_PER_LOAD } from '../../config.js';
+
+export async function getStaticPaths() {
+    const regions = Object.keys(regionData);
+    
+    return regions.map(region => ({
+        params: { region },
+        props: { region } // pass region metadata if needed
+    }));
+}
+
+const { region } = Astro.props;
+const events = getEventsByRegion(region);
+
+// Initial SSG render doesn't assume a date filter for regions other than "all dates for this region"
+// Or we could match the main.js behavior. Let's match main.js which sets active date to "Today" by default unless Region is clicked in dropdown. 
+// However, if jumping to `/region/seoul`, main.js clears date filter.
+const initialEvents = events.slice(0, ITEMS_PER_LOAD);
+
+const seoTitle = `${region} 무료 전시·공연·축제 일정 - 무료한 문화생활`;
+const seoDescription = `${region} 지역의 무료 전시, 공연, 축제 등 문화 이벤트 큐레이션을 확인해보세요.`;
+
+---
+
+<Layout title={seoTitle} description={seoDescription}>
+    <FilterApp>
+        {initialEvents.length > 0 ? (
+            initialEvents.map(event => <EventCard event={event} />)
+        ) : (
+            <p style="text-align:center; padding: 40px; color: var(--text-secondary);">선택한 조건에 맞는 행사 정보가 없습니다.</p>
+        )}
+    </FilterApp>
+</Layout>

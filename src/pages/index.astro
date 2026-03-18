@@ -1,0 +1,35 @@
+---
+import Layout from '../layouts/Layout.astro';
+import FilterApp from '../components/FilterApp.astro';
+import EventCard from '../components/EventCard.astro';
+import { getAllEvents } from '../lib/data.js';
+import { ITEMS_PER_LOAD } from '../config.js';
+
+// For index page, we filter by today's date for initial render.
+const allEvents = getAllEvents();
+
+// Helper to match existing main.js behavior
+function getTodayString() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}${month}${day}`;
+}
+
+const todayStr = getTodayString();
+const initialEvents = allEvents.filter(event => {
+    return Number(event.startDate) <= Number(todayStr) && Number(event.endDate) >= Number(todayStr);
+}).slice(0, ITEMS_PER_LOAD);
+
+---
+
+<Layout>
+    <FilterApp>
+        {initialEvents.length > 0 ? (
+            initialEvents.map(event => <EventCard event={event} />)
+        ) : (
+            <p style="text-align:center; padding: 40px; color: var(--text-secondary);">선택한 조건에 맞는 행사 정보가 없습니다.</p>
+        )}
+    </FilterApp>
+</Layout>

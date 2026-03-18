@@ -1,0 +1,32 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import FilterApp from '../../components/FilterApp.astro';
+import EventCard from '../../components/EventCard.astro';
+import { getEventsByCategory } from '../../lib/data.js';
+import { categoryData, ITEMS_PER_LOAD } from '../../config.js';
+
+export async function getStaticPaths() {
+    return categoryData.map(category => ({
+        // Use spread syntax since categories can contain slashes e.g. "음악/콘서트"
+        params: { category },
+        props: { category }
+    }));
+}
+
+const { category } = Astro.props;
+const events = getEventsByCategory(category);
+const initialEvents = events.slice(0, ITEMS_PER_LOAD);
+
+const seoTitle = `무료 ${category} 행사 및 일정 - 무료한 문화생활`;
+const seoDescription = `전국의 무료 ${category} 관련 전시, 공연, 축제 데이터를 모아보고 스마트하게 검색하세요.`;
+---
+
+<Layout title={seoTitle} description={seoDescription}>
+    <FilterApp>
+        {initialEvents.length > 0 ? (
+            initialEvents.map(event => <EventCard event={event} />)
+        ) : (
+            <p style="text-align:center; padding: 40px; color: var(--text-secondary);">선택한 조건에 맞는 행사 정보가 없습니다.</p>
+        )}
+    </FilterApp>
+</Layout>

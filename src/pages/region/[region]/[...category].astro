@@ -1,0 +1,40 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import FilterApp from '../../../components/FilterApp.astro';
+import EventCard from '../../../components/EventCard.astro';
+import { getEventsByRegionAndCategory } from '../../../lib/data.js';
+import { regionData, categoryData, ITEMS_PER_LOAD } from '../../../config.js';
+
+export async function getStaticPaths() {
+    const paths = [];
+    const regions = Object.keys(regionData);
+    
+    for (const region of regions) {
+        for (const category of categoryData) {
+            paths.push({
+                params: { region, category },
+                props: { region, category }
+            });
+        }
+    }
+    
+    return paths;
+}
+
+const { region, category } = Astro.props;
+const events = getEventsByRegionAndCategory(region, category);
+const initialEvents = events.slice(0, ITEMS_PER_LOAD);
+
+const seoTitle = `${region} 무료 ${category} 일정 - 무료한 문화생활`;
+const seoDescription = `${region} 지역에서 열리는 무료 ${category} 행사를 확인하고 주말 계획을 세워보세요.`;
+---
+
+<Layout title={seoTitle} description={seoDescription}>
+    <FilterApp>
+        {initialEvents.length > 0 ? (
+            initialEvents.map(event => <EventCard event={event} />)
+        ) : (
+            <p style="text-align:center; padding: 40px; color: var(--text-secondary);">선택한 조건에 맞는 행사 정보가 없습니다.</p>
+        )}
+    </FilterApp>
+</Layout>

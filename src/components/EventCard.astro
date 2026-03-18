@@ -1,0 +1,31 @@
+---
+const { event } = Astro.props;
+
+function unescapeHtml(escapedStr) {
+    if (!escapedStr) return '';
+    return escapedStr
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#039;/g, "'");
+}
+
+const secureImgUrl = event.imgUrl.replace('http://', 'https://');
+const title = unescapeHtml(event.title);
+const priceTagHtml = event.price.includes('무료') 
+    ? `<span style="color: var(--accent-color); font-weight: 500;">무료</span>` 
+    : '유료';
+---
+
+<div class="event-card">
+    <img src={secureImgUrl} alt={title} class="thumbnail" onerror="this.src='https://placehold.co/600x400/E1E5EA/717171?text=Image+Not+Found'">
+    <div class="event-info">
+        <p class="category-tag">{event.realmName} &bull; <Fragment set:html={priceTagHtml}/></p>
+        <h3>{title}</h3>
+        <div class="location-info">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            <span>{event.area} {event.sigungu}</span>
+        </div>
+    </div>
+</div>
